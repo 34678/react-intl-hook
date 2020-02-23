@@ -1,17 +1,30 @@
 import * as React from "react";
-import axios from 'axios'
+import { getMessages } from "./util";
 let ContextOne = React.createContext();
 
+
 let initialState = {
-  local:'',
-  messages:{}
+  local: "",
+  messages: {}
 };
-
-
-async function getintl(dispatch){
-    const res = await axios.get('http://multi-lang.yy.com/multiLangBig/m_girgir/newamature/en.json')
-    initialState.messages = res.data.data
-    dispatch({ type: "set-msg", payload: res.data.data });
+/**
+ * 
+ * @param {*} dispatch context的reducer对应的dispath方法
+ * @param {*} moduleMap 路径和使用多语言模块的对应
+ * @param {*} pathname 路径
+ * @param {*} i18nproject 大的多语言项目
+ * @param {*} locale 使用语言
+ */
+async function getintl(
+  dispatch,
+  moduleMap,
+  pathname = "",
+  i18nproject = "",
+  locale = "zh"
+) {
+  debugger
+  const data = await getMessages(moduleMap, pathname, i18nproject, locale);
+  dispatch({ type: "set-msg", payload: data });
 }
 
 let reducer = (state, action) => {
@@ -24,11 +37,8 @@ let reducer = (state, action) => {
 };
 
 function ContextOneProvider(props) {
-  // [A]
   let [state, dispatch] = React.useReducer(reducer, initialState);
   let value = { state, dispatch };
-  getintl(dispatch)
-  // [B]
   return (
     <ContextOne.Provider value={value}>{props.children}</ContextOne.Provider>
   );
@@ -36,5 +46,4 @@ function ContextOneProvider(props) {
 
 let ContextOneConsumer = ContextOne.Consumer;
 
-// [C]
-export { ContextOne, ContextOneProvider, ContextOneConsumer };
+export { ContextOne, ContextOneProvider, ContextOneConsumer, getintl };
